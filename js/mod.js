@@ -13,7 +13,7 @@ let modInfo = {
 // Set your version in num and name
 let VERSION = {
 	num: "0.2",
-	name: "太墙了🥵🥵🥵😡😡😡<br><i>当前版本终局：1e4墙",
+	name: "太墙了🥵🥵🥵😡😡😡<br><i>当前版本终局：1e5墙",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
@@ -60,7 +60,7 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	return (player.w.points.gte(new Decimal(1e4))&&hasChallenge('w',14))
+	return (player.w.points.gte(new Decimal(1e5))&&hasChallenge('w',14))
 }
 
 

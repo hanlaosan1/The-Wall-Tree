@@ -29,23 +29,18 @@ addLayer("w", {
         return exp
     },
     passiveGeneration(){
-        if(!inChallenge('w',14))
-        {
-            if(hasUpgrade('w',23)) return 0.01
-            if(hasUpgrade('w',11)) return 0.001
-        }
+            if(hasUpgrade('w',23)) return 0.1
+            if(hasUpgrade('w',11)) return 0.01
     },
     row: 0, // Row the layer is in on the tree (0 is the first row)
     upgrades:{
         11:{
             name:"wu1",
             title(){
-                if(inChallenge('w',14)) return"自动被墙<br> <i style=\"color: #FF0000;\">已被禁用</i>"
                 return "自动被墙"
             },
             description(){
-                if(!inChallenge('w',14)) return "每秒获取重置时获取的墙的%0.1"
-                return "<s style=\"color:rgb(75, 75, 75);\">每秒获取重置时获取的墙的%0.1</s>"
+                return "每秒获取重置时获取的墙的%1"
             },
             cost:new Decimal(1),
         },
@@ -86,7 +81,7 @@ addLayer("w", {
         23:{
             name:"wu4",
             title:"这款游戏是给婴儿玩的吗",
-            description:"升级11效果%0.1 -> %1",
+            description:"升级11效果%1 -> %10",
             cost:new Decimal(150),
             unlocked(){return hasChallenge('w',13)}
         },
@@ -111,7 +106,7 @@ addLayer("w", {
     challenges: {
         11: {
             name: "wc1",
-            challengeDescription: "时间获取速度/10",
+            challengeDescription: "时间获取速度/10<br><p style=\"color:rgb(255, 0, 0);\">不要点击重置，会退出挑战</p>",
             goalDescription:"拥有1墙",
             canComplete: function() {return player[this.layer].points.gte(1)},
             onEnter(){
@@ -127,7 +122,7 @@ addLayer("w", {
         },
         12: {
             name: "wc2",
-            challengeDescription: "墙获取/5",
+            challengeDescription: "墙获取/5<br><p style=\"color:rgb(255, 0, 0);\">不要点击重置，会退出挑战</p>",
             goalDescription:"拥有5墙",
             canComplete: function() {return player[this.layer].points.gte(5)},
             onEnter(){
@@ -143,7 +138,7 @@ addLayer("w", {
         },
         13: {
             name: "wc3",
-            challengeDescription: "时间获取速度/10,墙获取/5",
+            challengeDescription: "时间获取速度/10,墙获取/5<br><p style=\"color:rgb(255, 0, 0);\">不要点击重置，会退出挑战</p>",
             goalDescription:"拥有10墙",
             canComplete: function() {return player[this.layer].points.gte(10)},
             onEnter(){
@@ -159,16 +154,18 @@ addLayer("w", {
         },
         14: {
             name: "wc4",
-            challengeDescription: "时间获取速度^0.01,墙获取^0.6,禁用自动获取墙",
+            challengeDescription: "时间获取速度^0.01,墙获取^0.6<br><p style=\"color:rgb(255, 0, 0);\">不要点击重置，会退出挑战</p>",
             goalDescription:"拥有10墙",
             canComplete: function() {return player[this.layer].points.gte(10)},
             onEnter(){
                 player.points=new Decimal(0)
                 player.w.points=new Decimal(0)
+                return
             },
             onExit(){
                 player.points=new Decimal(0)
                 player.w.points=new Decimal(0)
+                return
             },
             rewardDescription:"墙获取基于当前时间数获得一个加成,解锁一些新升级",
             rewardEffect(){return player.points.add(1).pow(0.03)},
