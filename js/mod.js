@@ -12,8 +12,8 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.1",
-	name: "太墙了🥵🥵🥵😡😡😡   当前版本终局：50墙",
+	num: "0.2",
+	name: "太墙了🥵🥵🥵😡😡😡<br><i>当前版本终局：1e4墙",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
@@ -21,7 +21,7 @@ let changelog = `<h1>Changelog:</h1><br>
 		- Added things.<br>
 		- Added stuff.`
 
-let winText = `Congratulations! You have reached the end and beaten this game, but for now...`
+let winText = `墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙`
 
 // If you add new functions anywhere inside of a layer, and those functions have an effect when called, add them here.
 // (The ones here are examples, all official functions are already taken care of)
@@ -42,9 +42,11 @@ function getPointGen() {
 		return new Decimal(0)
 
 	let gain = new Decimal(1)
+	if(hasUpgrade('w',21)) gain=gain.times(3)
 	if(inChallenge('w',11)||inChallenge('w',13)) gain=gain.div(10)
 	if(hasChallenge('w',11)) gain=gain.times(9)
 	if(hasChallenge('w',13)) gain=gain.pow(1.05)
+	if(inChallenge('w',14)) gain=gain.pow(0.01)
 	return gain
 }
 
@@ -58,7 +60,7 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	return (player.w.points.gte(new Decimal(50))&&hasChallenge('w',13))
+	return (player.w.points.gte(new Decimal(1e4))&&hasChallenge('w',14))
 }
 
 
