@@ -1,3 +1,4 @@
+cha: new Decimal(1),
 addLayer("w", {
     name: "wall", // This is optional, only used in a few places, If absent it just uses the layer id.
     symbol: "W", // This appears on the layer's node. Default is the id with the first letter capitalized
@@ -32,6 +33,11 @@ addLayer("w", {
             if(hasUpgrade('w',23)) return 0.1
             if(hasUpgrade('w',11)) return 0.01
     },
+    Speedup(){
+        dev=new Decimal(1)
+        if(hasUpgrade('w',33)) dev=dev.times(2)
+        player.devSpeed=dev
+    },
     row: 0, // Row the layer is in on the tree (0 is the first row)
     upgrades:{
         11:{
@@ -45,32 +51,40 @@ addLayer("w", {
             cost:new Decimal(1),
         },
         12:{
+            name:"wu2",
+            title:"哪来的挑战？",
+            description:"根据已完成挑战数加成时间获取",
+            effect(){return player.cha},
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
+            cost:new Decimal(1)
+        },
+        13:{
             name:"unlwc1",
-            title:"更墙的来了",
+            title:"挑战来了",
             description:"解锁墙挑战1",
             cost:new Decimal(5)
         },
-        13:{
+        14:{
             name:"unlwc2",
             title:"比上个还墙",
             description:"解锁墙挑战2",
             cost:new Decimal(10)
         },
-        14:{
+        15:{
             name:"unlwc3",
             title:"我不想被墙了",
             description:"解锁墙挑战3",
             cost:new Decimal(20)
         },
         21:{
-            name:"wu2",
+            name:"wu3",
             title:"没一个够墙的",
             description:"获取时间速度*3",
             cost:new Decimal(30),
             unlocked(){return hasChallenge('w',13)}
         },
         22:{
-            name:"wu3",
+            name:"wu4",
             title:"这游戏越来越简单了",
             description:"基于时间数加成墙获取",
             cost:new Decimal(100),
@@ -79,7 +93,7 @@ addLayer("w", {
             unlocked(){return hasChallenge('w',13)}
         },
         23:{
-            name:"wu4",
+            name:"wu5",
             title:"这款游戏是给婴儿玩的吗",
             description:"升级11效果%1 -> %10",
             cost:new Decimal(150),
@@ -93,15 +107,30 @@ addLayer("w", {
             unlocked(){return hasChallenge('w',13)}
         },
         31:{
-            name:"wu5",
-            title:"时间墙？是啥",
+            name:"wu6",
+            title:"从未墙过",
             description:"基于墙数量加成墙获取",
             effect(){return player.points.add(1).pow(0.1)},
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
             cost:new Decimal(1e3),
             unlocked(){return hasChallenge('w',14)}
         },
-
+        32:{
+            name:"wu7",
+            title:"无用的升级",
+            description:"时间获取速度x5",
+            effect(){return 5},
+            effectDisplay() { return "5x" },
+            cost:new Decimal(2e3),
+            unlocked(){return hasChallenge('w',14)}
+        },
+        33:{
+            name:"wu8",
+            title:"时间太慢了！",
+            description:"将游戏速度x2",
+            cost:new Decimal(1e4),
+            unlocked(){return hasChallenge('w',14)}
+        }
     },
     challenges: {
         11: {
@@ -117,8 +146,11 @@ addLayer("w", {
                 player.points=new Decimal(0)
                 player.w.points=new Decimal(0)
             },
+            onComplete(){
+                player.cha=player.cha.add(1)
+            },
             rewardDescription:"时间获取速度*9",
-            unlocked(){return hasUpgrade('w',12)}
+            unlocked(){return hasUpgrade('w',13)}
         },
         12: {
             name: "wc2",
@@ -133,8 +165,11 @@ addLayer("w", {
                 player.points=new Decimal(0)
                 player.w.points=new Decimal(0)
             },
+            onComplete(){
+                player.cha=player.cha.add(1)
+            },
             rewardDescription:"墙获取*4",
-            unlocked(){return hasUpgrade('w',13)}
+            unlocked(){return hasUpgrade('w',14)}
         },
         13: {
             name: "wc3",
@@ -149,8 +184,11 @@ addLayer("w", {
                 player.points=new Decimal(0)
                 player.w.points=new Decimal(0)
             },
+            onComplete(){
+                player.cha=player.cha.add(1)
+            },
             rewardDescription:"时间获取速度和墙获取^1.05,解锁一些新升级",
-            unlocked(){return hasUpgrade('w',14)}
+            unlocked(){return hasUpgrade('w',15)}
         },
         14: {
             name: "wc4",
@@ -160,12 +198,13 @@ addLayer("w", {
             onEnter(){
                 player.points=new Decimal(0)
                 player.w.points=new Decimal(0)
-                return
             },
             onExit(){
                 player.points=new Decimal(0)
                 player.w.points=new Decimal(0)
-                return
+            },
+            onComplete(){
+                player.cha=player.cha.add(1)
             },
             rewardDescription:"墙获取基于当前时间数获得一个加成,解锁一些新升级",
             rewardEffect(){return player.points.add(1).pow(0.03)},

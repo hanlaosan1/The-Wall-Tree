@@ -12,8 +12,8 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.2",
-	name: "太墙了🥵🥵🥵😡😡😡<br><i>当前版本终局：1e5墙",
+	num: "0.3",
+	name: "拜谢升级！  当前版本终局：1e5墙",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
@@ -21,7 +21,7 @@ let changelog = `<h1>Changelog:</h1><br>
 		- Added things.<br>
 		- Added stuff.`
 
-let winText = `墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙墙`
+let winText = `<img src=\"s297.gif\" width=\"50\" height=\"50\">`
 
 // If you add new functions anywhere inside of a layer, and those functions have an effect when called, add them here.
 // (The ones here are examples, all official functions are already taken care of)
@@ -42,16 +42,19 @@ function getPointGen() {
 		return new Decimal(0)
 
 	let gain = new Decimal(1)
+	if(hasUpgrade('w',12)) gain=gain.times(upgradeEffect('w',12))
 	if(hasUpgrade('w',21)) gain=gain.times(3)
 	if(inChallenge('w',11)||inChallenge('w',13)) gain=gain.div(10)
 	if(hasChallenge('w',11)) gain=gain.times(9)
 	if(hasChallenge('w',13)) gain=gain.pow(1.05)
 	if(inChallenge('w',14)) gain=gain.pow(0.01)
+	if(hasUpgrade('w',32)) gain=gain.times(upgradeEffect('w',32))
 	return gain
 }
 
 // You can add non-layer related variables that should to into "player" and be saved here, along with default values
 function addedPlayerData() { return {
+	cha:new Decimal(1)
 }}
 
 // Display extra things at the top of the page
