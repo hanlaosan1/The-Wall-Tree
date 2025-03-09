@@ -126,7 +126,7 @@ addLayer("w", {
         },
         33:{
             name:"wu8",
-            title:"时间太慢了！",
+            title:"tt2协议",
             description:"将游戏速度x2",
             cost:new Decimal(1e4),
             unlocked(){return hasChallenge('w',14)}
@@ -222,7 +222,7 @@ addLayer("w", {
     buyables: {
         11: {
             cost(x) { return new Decimal(10).pow(x) },
-            display() { return "拜谢<img src=\"s297.gif\" width=\"25\" height=\"25\"><br>你有"+getBuyableAmount(this.layer, this.id)+"个<img src=\"s297.gif\" width=\"25\" height=\"25\"><br>基于当前<img src=\"s297.gif\" width=\"25\" height=\"25\">数量加成时间获取<br>Currently: "+format(this.effect(getBuyableAmount(this.layer, this.id)))+"x"+"<br>cost:"+this.cost(getBuyableAmount(this.layer, this.id))},
+            display() { return "拜谢<img src=\"s297.gif\" width=\"25\" height=\"25\"><br>你有"+getBuyableAmount(this.layer, this.id)+"个<img src=\"s297.gif\" width=\"25\" height=\"25\"><br>基于当前<img src=\"s297.gif\" width=\"25\" height=\"25\">数量加成时间获取<br>Currently: "+format(this.effect(getBuyableAmount(this.layer, this.id)))+"x"+"<br>cost:"+format(this.cost(getBuyableAmount(this.layer, this.id)))},
             canAfford() { return player[this.layer].points.gte(this.cost()) },
             buy() {
                 player[this.layer].points = player[this.layer].points.sub(this.cost())
