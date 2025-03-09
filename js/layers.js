@@ -130,6 +130,13 @@ addLayer("w", {
             description:"将游戏速度x2",
             cost:new Decimal(1e4),
             unlocked(){return hasChallenge('w',14)}
+        },
+        41:{
+            name:"wu9",
+            title:"这是什么？",
+            description:"解锁一个可购买",
+            cost:new Decimal(1e5),
+            unlocked(){return hasUpgrade('w',33)}
         }
     },
     challenges: {
@@ -207,10 +214,47 @@ addLayer("w", {
                 player.cha=player.cha.add(1)
             },
             rewardDescription:"墙获取基于当前时间数获得一个加成,解锁一些新升级",
-            rewardEffect(){return player.points.add(1).pow(0.03)},
+            rewardEffect(){return player.points.add(1).pow(0.001)},
             rewardDisplay(){return "^"+format(challengeEffect(this.layer, this.id))},
             unlocked(){return hasUpgrade('w',24)}
         },
+    },
+    buyables: {
+        11: {
+            cost(x) { return new Decimal(10).pow(x) },
+            display() { return "拜谢<img src=\"s297.gif\" width=\"25\" height=\"25\"><br>你有"+getBuyableAmount(this.layer, this.id)+"个<img src=\"s297.gif\" width=\"25\" height=\"25\"><br>基于当前<img src=\"s297.gif\" width=\"25\" height=\"25\">数量加成时间获取<br>Currently: "+format(this.effect(getBuyableAmount(this.layer, this.id)))+"x"+"<br>cost:"+this.cost(getBuyableAmount(this.layer, this.id))},
+            canAfford() { return player[this.layer].points.gte(this.cost()) },
+            buy() {
+                player[this.layer].points = player[this.layer].points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            title(){return "<img src=\"s297.gif\" width=\"50\" height=\"50\">"},
+            effect(x){return x.times(1.5).add(1)},
+            unlocked(){return hasUpgrade('w',41)}
+        },
+    },
+    tabFormat: {
+        "upgrade":{
+            content:[
+                "main-display",
+                "prestige-button",
+                "resource-display",
+               ["display-text",
+                  function() {
+                      return "墙的乘数："+format(tmp.w.gainMult.pow(tmp.w.gainExp))
+                   },
+                { "color": "#FFFFFF", "font-size": "20px"}],
+              "upgrades",
+              "buyables",
+            ]   
+        },
+        "challenge":{
+            content:[
+                "main-display",
+                "prestige-button",
+                "challenges"
+            ]  
+        }
     },
     layerShown(){return true}
 })

@@ -13,7 +13,7 @@ let modInfo = {
 // Set your version in num and name
 let VERSION = {
 	num: "0.3",
-	name: "拜谢升级！  当前版本终局：1e5墙",
+	name: "拜谢升级！",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
@@ -49,6 +49,7 @@ function getPointGen() {
 	if(hasChallenge('w',13)) gain=gain.pow(1.05)
 	if(inChallenge('w',14)) gain=gain.pow(0.01)
 	if(hasUpgrade('w',32)) gain=gain.times(upgradeEffect('w',32))
+	if(hasUpgrade('w',41)) gain=gain.times(buyableEffect('w',11))
 	return gain
 }
 
@@ -58,12 +59,12 @@ function addedPlayerData() { return {
 }}
 
 // Display extra things at the top of the page
-var displayThings = [
+var displayThings = ["当前版本终局:1e5墙"
 ]
 
 // Determines when the game "ends"
 function isEndgame() {
-	return (player.w.points.gte(new Decimal(1e5))&&hasChallenge('w',14))
+	return (player.w.points.gte(new Decimal(1e6))&&hasChallenge('w',14))
 }
 
 
