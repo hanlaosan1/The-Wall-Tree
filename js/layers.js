@@ -36,6 +36,7 @@ addLayer("w", {
     Speedup(){
         dev=new Decimal(1)
         if(hasUpgrade('w',33)) dev=dev.times(2)
+        if(inChallenge('w',15)) dev=dev.div(100)
         player.devSpeed=dev
     },
     row: 0, // Row the layer is in on the tree (0 is the first row)
@@ -137,6 +138,20 @@ addLayer("w", {
             description:"解锁一个可购买",
             cost:new Decimal(1e5),
             unlocked(){return hasUpgrade('w',33)}
+        },
+        42:{
+            name:"wu9",
+            title:"拜谢之力",
+            description:"拜谢的效果 1.5x -> 2x",
+            cost:new Decimal(1e7),
+            unlocked(){return hasUpgrade('w',33)}
+        },
+        51:{
+            name:"unlwc5",
+            title:"最后的时间墙",
+            description:"解锁wc5",
+            cost:new Decimal(1e9),
+            unlocked(){return hasUpgrade('w',42)}
         }
     },
     challenges: {
@@ -218,6 +233,25 @@ addLayer("w", {
             rewardDisplay(){return "^"+format(challengeEffect(this.layer, this.id))},
             unlocked(){return hasUpgrade('w',24)}
         },
+        15: {
+            name: "wc5",
+            challengeDescription: "游戏速度/100<br><p style=\"color:rgb(255, 0, 0);\">不要点击重置，会退出挑战</p>",
+            goalDescription:"拥有1000墙",
+            canComplete: function() {return player[this.layer].points.gte(1000)},
+            onEnter(){
+                player.points=new Decimal(0)
+                player.w.points=new Decimal(0)
+            },
+            onExit(){
+                player.points=new Decimal(0)
+                player.w.points=new Decimal(0)
+            },
+            onComplete(){
+                player.cha=player.cha.add(1)
+            },
+            rewardDescription:"终局",
+            unlocked(){return hasUpgrade('w',51)}
+        },
     },
     buyables: {
         11: {
@@ -229,7 +263,14 @@ addLayer("w", {
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
             },
             title(){return "<img src=\"s297.gif\" width=\"50\" height=\"50\">"},
-            effect(x){return x.times(1.5).add(1)},
+            effect(x){
+                if(!hasUpgrade('w',42)){
+                    return x.times(1.5).add(1)
+                }
+                else{
+                    return x.times(2).add(1)
+                }
+            },
             unlocked(){return hasUpgrade('w',41)}
         },
     },

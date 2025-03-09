@@ -64,7 +64,7 @@ var displayThings = ["当前版本终局:1e5墙"
 
 // Determines when the game "ends"
 function isEndgame() {
-	return (player.w.points.gte(new Decimal(1e6))&&hasChallenge('w',14))
+	return (hasChallenge('w',15))
 }
 
 
