@@ -1,4 +1,3 @@
-cha: new Decimal(1),
 addLayer("w", {
     name: "wall", // This is optional, only used in a few places, If absent it just uses the layer id.
     symbol: "W", // This appears on the layer's node. Default is the id with the first letter capitalized
@@ -20,6 +19,7 @@ addLayer("w", {
         if(inChallenge('w',12)||inChallenge('w',13)) mult=mult.div(5)
         if(hasUpgrade('w',22)) mult=mult.times(upgradeEffect('w',22))
         if(hasUpgrade('w',31)) mult=mult.times(upgradeEffect('w',31))
+        if(hasMilestone('d',2)) mult=mult.times(player.d.points.times(2).add(1))
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -30,8 +30,9 @@ addLayer("w", {
         return exp
     },
     passiveGeneration(){
-            if(hasUpgrade('w',23)) return 0.1
-            if(hasUpgrade('w',11)) return 0.01
+        if(hasMilestone('d',3)) return 1
+        if(hasUpgrade('w',23)) return 0.1
+        if(hasUpgrade('w',11)) return 0.01
     },
     Speedup(){
         dev=new Decimal(1)
@@ -40,6 +41,7 @@ addLayer("w", {
         player.devSpeed=dev
     },
     row: 0, // Row the layer is in on the tree (0 is the first row)
+    chaHardcap(){if(player.d.cha.gte(6)) player.d.cha=new Decimal(6)},
     upgrades:{
         11:{
             name:"wu1",
@@ -55,7 +57,7 @@ addLayer("w", {
             name:"wu2",
             title:"哪来的挑战？",
             description:"根据已完成挑战数加成时间获取",
-            effect(){return player.cha},
+            effect(){return player.d.cha},
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
             cost:new Decimal(1)
         },
@@ -96,7 +98,7 @@ addLayer("w", {
         23:{
             name:"wu5",
             title:"这款游戏是给婴儿玩的吗",
-            description:"升级11效果%1 -> %10",
+            description:"wu1效果%1 -> %10",
             cost:new Decimal(150),
             unlocked(){return hasChallenge('w',13)}
         },
@@ -142,15 +144,15 @@ addLayer("w", {
         42:{
             name:"wu9",
             title:"拜谢之力",
-            description:"拜谢的效果 1.5x -> 2x",
-            cost:new Decimal(1e7),
-            unlocked(){return hasUpgrade('w',33)}
+            description:"拜谢的效果 5x -> 50x",
+            cost:new Decimal(1e6),
+            unlocked(){return hasUpgrade('w',41)}
         },
         51:{
             name:"unlwc5",
             title:"最后的时间墙",
             description:"解锁wc5",
-            cost:new Decimal(1e9),
+            cost:new Decimal(1e7),
             unlocked(){return hasUpgrade('w',42)}
         }
     },
@@ -169,7 +171,7 @@ addLayer("w", {
                 player.w.points=new Decimal(0)
             },
             onComplete(){
-                player.cha=player.cha.add(1)
+                player.d.cha=player.d.cha.add(1)
             },
             rewardDescription:"时间获取速度*9",
             unlocked(){return hasUpgrade('w',13)}
@@ -188,7 +190,7 @@ addLayer("w", {
                 player.w.points=new Decimal(0)
             },
             onComplete(){
-                player.cha=player.cha.add(1)
+                player.d.cha=player.d.cha.add(1)
             },
             rewardDescription:"墙获取*4",
             unlocked(){return hasUpgrade('w',14)}
@@ -207,7 +209,7 @@ addLayer("w", {
                 player.w.points=new Decimal(0)
             },
             onComplete(){
-                player.cha=player.cha.add(1)
+                player.d.cha=player.d.cha.add(1)
             },
             rewardDescription:"时间获取速度和墙获取^1.05,解锁一些新升级",
             unlocked(){return hasUpgrade('w',15)}
@@ -226,7 +228,7 @@ addLayer("w", {
                 player.w.points=new Decimal(0)
             },
             onComplete(){
-                player.cha=player.cha.add(1)
+                player.d.cha=player.d.cha.add(1)
             },
             rewardDescription:"墙获取基于当前时间数获得一个加成,解锁一些新升级",
             rewardEffect(){return player.points.add(1).pow(0.001)},
@@ -236,8 +238,8 @@ addLayer("w", {
         15: {
             name: "wc5",
             challengeDescription: "游戏速度/100<br><p style=\"color:rgb(255, 0, 0);\">不要点击重置，会退出挑战</p>",
-            goalDescription:"拥有1000墙",
-            canComplete: function() {return player[this.layer].points.gte(1000)},
+            goalDescription:"拥有100墙",
+            canComplete: function() {return player[this.layer].points.gte(100)},
             onEnter(){
                 player.points=new Decimal(0)
                 player.w.points=new Decimal(0)
@@ -247,15 +249,20 @@ addLayer("w", {
                 player.w.points=new Decimal(0)
             },
             onComplete(){
-                player.cha=player.cha.add(1)
+                player.d.cha=player.d.cha.add(1)
             },
-            rewardDescription:"终局",
+            rewardDescription:"解锁下一层级,根据墙数量加成拜谢效果",
+            rewardEffect(){
+                if(hasChallenge('w',15)) return player.w.points.add(1).log(10)
+                else return new Decimal(1)
+            },
+            rewardDisplay(){return "x"+format(challengeEffect(this.layer, this.id))},
             unlocked(){return hasUpgrade('w',51)}
         },
     },
     buyables: {
         11: {
-            cost(x) { return new Decimal(10).pow(x) },
+            cost(x) { return new Decimal(10).pow(x).div(10) },
             display() { return "拜谢<img src=\"s297.gif\" width=\"25\" height=\"25\"><br>你有"+getBuyableAmount(this.layer, this.id)+"个<img src=\"s297.gif\" width=\"25\" height=\"25\"><br>基于当前<img src=\"s297.gif\" width=\"25\" height=\"25\">数量加成时间获取<br>Currently: "+format(this.effect(getBuyableAmount(this.layer, this.id)))+"x"+"<br>cost:"+format(this.cost(getBuyableAmount(this.layer, this.id)))},
             canAfford() { return player[this.layer].points.gte(this.cost()) },
             buy() {
@@ -265,15 +272,20 @@ addLayer("w", {
             title(){return "<img src=\"s297.gif\" width=\"50\" height=\"50\">"},
             effect(x){
                 if(!hasUpgrade('w',42)){
-                    return x.times(1.5).add(1)
+                    return x.times(5).add(1)
                 }
                 else{
-                    return x.times(2).add(1)
+                    return x.times(50).times(challengeEffect('w',15)).add(1)
                 }
             },
             unlocked(){return hasUpgrade('w',41)}
         },
     },
+    automate()
+    {
+           if(hasMilestone('d',4)&&layers.w.buyables[11].canAfford()) buyBuyable('w',11)
+    },
+    autoUpgrade(){return hasMilestone('d',5)},
     tabFormat: {
         "upgrade":{
             content:[
@@ -297,5 +309,87 @@ addLayer("w", {
             ]  
         }
     },
+    resetsNothing(){return false},
+    doReset(resettingLayer){
+        if(hasMilestone('d',6)&&resettingLayer=='d') layerDataReset('w',["challenges"])
+    },
     layerShown(){return true}
+})
+addLayer("d", {
+    startData() { return {                   
+        unlocked(){return hasChallenge('w',15)},                     
+        points: new Decimal(0),              
+        cha:new Decimal(1)
+    }},
+    name:"delation wall",
+    color: "#8E2323",                  
+    symbol:"DW",     
+    resource: "膨胀墙",             
+    row: 1,                                  
+    baseResource: "墙",                  
+    baseAmount() { return player.w.points },   
+    requires: new Decimal(1e7),              
+    type: "normal",                         
+    exponent: 0.3,                
+    branches:['w'],          
+    position:0,
+    gainMult() {                            
+        return new Decimal(1)                
+    },
+    gainExp() {                             
+        return new Decimal(1)
+    },
+    milestones:{
+        0:{
+            requirementDescription: "1 膨胀墙",
+            effectDescription: "这个层级永久解锁",
+            done() { return player.d.points.gte(1) }
+        },
+        1:{
+            requirementDescription: "2 膨胀墙",
+            effectDescription: "时间获取速度*100",
+            done() { return player.d.points.gte(2) }
+        },
+        2:{
+            requirementDescription: "3 膨胀墙",
+            effectDescription(){return "基于膨胀墙加成墙获取<br>Currently:x"+format(player.d.points.times(2).add(1))},
+            done() { return player.d.points.gte(3) }
+        },
+        3:{
+            requirementDescription: "5 膨胀墙",
+            effectDescription: "wu1效果 1% -> 100%",
+            done() { return player.d.points.gte(5) }
+        },
+        4:{
+            requirementDescription: "500 膨胀墙",
+            effectDescription: "自动购买拜谢",
+            done() { return player.d.points.gte(500) }
+        },
+        5:{
+            requirementDescription: "600 膨胀墙",
+            effectDescription: "自动购买升级",
+            done() { return player.d.points.gte(600) }
+        },
+        6:{
+            requirementDescription: "700 膨胀墙",
+            effectDescription: "膨胀墙重置时保留挑战完成",
+            done() { return player.d.points.gte(700) }
+        },
+        7:{
+            requirementDescription: "1000 膨胀墙",
+            effectDescription: "当前版本终局",
+            done() { return player.d.points.gte(1000) }
+        },
+    },
+    layerShown() { return hasChallenge('w',15)||hasMilestone('d',0)},
+    tabFormat: {
+        "milestone":{
+            content:[
+                "main-display",
+                "prestige-button",
+                "resource-display",
+                "milestones"
+            ]   
+        },
+    },
 })

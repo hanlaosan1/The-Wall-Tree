@@ -12,8 +12,8 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.4",
-	name: "拜谢升级！",
+	num: "0.?!?!",
+	name: "膨胀墙里程碑",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
@@ -50,21 +50,22 @@ function getPointGen() {
 	if(inChallenge('w',14)) gain=gain.pow(0.01)
 	if(hasUpgrade('w',32)) gain=gain.times(upgradeEffect('w',32))
 	if(hasUpgrade('w',41)) gain=gain.times(buyableEffect('w',11))
+	if(hasMilestone('d',1)) gain=gain.times(100)
 	return gain
 }
 
 // You can add non-layer related variables that should to into "player" and be saved here, along with default values
 function addedPlayerData() { return {
-	cha:new Decimal(1)
+	
 }}
 
 // Display extra things at the top of the page
-var displayThings = ["当前版本终局:1e5墙"
+var displayThings = ["当前版本终局:1000膨胀墙"
 ]
 
 // Determines when the game "ends"
 function isEndgame() {
-	return (hasChallenge('w',15))
+	return (hasMilestone('d',7))
 }
 
 
