@@ -21,7 +21,7 @@ let changelog = `<h1>Changelog:</h1><br>
 		- Added things.<br>
 		- Added stuff.`
 
-let winText = `<img src=\"s297.gif\" width=\"50\" height=\"50\">`
+let winText = `<img src=\"s297.gif\" width=\"50\" height=\"50\"><br>有bug反馈到我的qq：1763786760`
 
 // If you add new functions anywhere inside of a layer, and those functions have an effect when called, add them here.
 // (The ones here are examples, all official functions are already taken care of)

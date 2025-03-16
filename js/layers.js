@@ -311,7 +311,14 @@ addLayer("w", {
     },
     resetsNothing(){return false},
     doReset(resettingLayer){
-        if(hasMilestone('d',6)&&resettingLayer=='d') layerDataReset('w',["challenges"])
+
+        if(resettingLayer=='d') 
+        {
+            if(hasMilestone('d',6)) layerDataReset('w',["challenges"])
+            else{
+                layerDataReset('w',[])
+            }
+        }
     },
     layerShown(){return true}
 })
