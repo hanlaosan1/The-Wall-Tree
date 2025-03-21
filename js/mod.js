@@ -7,13 +7,13 @@ let modInfo = {
 	discordName: "",
 	discordLink: "",
 	initialStartPoints: new Decimal (0), // Used for hard resets and new players
-	offlineLimit: 24,  // In hours
+	offlineLimit: 114514,  // In hours
 }
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.?!?!",
-	name: "膨胀墙里程碑",
+	num: "0.?!??",
+	name: "膨胀墙升级",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
@@ -65,7 +65,7 @@ var displayThings = ["当前版本终局:1000膨胀墙"
 
 // Determines when the game "ends"
 function isEndgame() {
-	return (hasMilestone('d',7))
+	return hasMilestone('d',8)
 }
 
 
@@ -79,7 +79,7 @@ var backgroundStyle = {
 
 // You can change this if you have things that can be messed up by long tick lengths
 function maxTickLength() {
-	return(1000000) // Default is 1 hour which is just arbitrarily large
+	return(100000000000000000000) // Default is 1 hour which is just arbitrarily large
 }
 
 // Use this if you need to undo inflation from an older version. If the version is older than the version that fixed the issue,

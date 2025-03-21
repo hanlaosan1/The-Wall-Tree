@@ -144,7 +144,7 @@ addLayer("w", {
         42:{
             name:"wu9",
             title:"拜谢之力",
-            description:"拜谢的效果 5x -> 50x",
+            description:"拜谢的效果 *10",
             cost:new Decimal(1e6),
             unlocked(){return hasUpgrade('w',41)}
         },
@@ -263,20 +263,21 @@ addLayer("w", {
     buyables: {
         11: {
             cost(x) { return new Decimal(10).pow(x).div(10) },
-            display() { return "拜谢<img src=\"s297.gif\" width=\"25\" height=\"25\"><br>你有"+getBuyableAmount(this.layer, this.id)+"个<img src=\"s297.gif\" width=\"25\" height=\"25\"><br>基于当前<img src=\"s297.gif\" width=\"25\" height=\"25\">数量加成时间获取<br>Currently: "+format(this.effect(getBuyableAmount(this.layer, this.id)))+"x"+"<br>cost:"+format(this.cost(getBuyableAmount(this.layer, this.id)))},
+            display() { return "拜谢<img src=\"s297.gif\" width=\"25\" height=\"25\"><br>你有"+getBuyableAmount(this.layer, this.id)+"个<img src=\"s297.gif\" width=\"25\" height=\"25\"><br>基于当前<img src=\"s297.gif\" width=\"25\" height=\"25\">数量加成时间获取<br>Currently: "+format(this.effect())+"x"+"<br>cost:"+format(this.cost(getBuyableAmount(this.layer, this.id)))},
             canAfford() { return player[this.layer].points.gte(this.cost()) },
             buy() {
                 player[this.layer].points = player[this.layer].points.sub(this.cost())
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
             },
             title(){return "<img src=\"s297.gif\" width=\"50\" height=\"50\">"},
-            effect(x){
-                if(!hasUpgrade('w',42)){
-                    return x.times(5).add(1)
-                }
-                else{
-                    return x.times(50).times(challengeEffect('w',15)).add(1)
-                }
+            effect(){
+                x=getBuyableAmount(this.layer, this.id)
+                mult=new Decimal(1)
+                if(hasUpgrade('w',41)) mult=mult.times(5)
+                if(hasUpgrade('w',42)) mult=mult.times(10)
+                if(hasChallenge('w',15)) mult=mult.times(challengeEffect('w',15))  
+                if(hasUpgrade('d',12)) mult=mult.times(upgradeEffect('d',12))
+                return x.times(mult).add(1)
             },
             unlocked(){return hasUpgrade('w',41)}
         },
@@ -340,11 +341,68 @@ addLayer("d", {
     exponent: 0.3,                
     branches:['w'],          
     position:0,
-    gainMult() {                            
-        return new Decimal(1)                
+    gainMult() {               
+        mult= new Decimal(1)
+        if(hasUpgrade('d',22)) mult=mult.times(upgradeEffect('d',22))
+        if(hasUpgrade('d',23)) mult=mult.times(upgradeEffect('d',23))
+        return mult                
     },
-    gainExp() {                             
-        return new Decimal(1)
+    gainExp() { 
+        exp= new Decimal(1)                            
+        if(hasUpgrade('d',13)) exp=exp.times(1.01)
+        return exp
+    },
+    upgrades:{
+        11:{
+            name:"dwu1",
+            title:"这是真的吗",
+            description:"每秒获得重置可获得的膨胀墙的%10",
+            unlocked(){return hasMilestone('d',7)},
+            cost:new Decimal(100)
+        },
+        12:{
+            name:"dwu2",
+            title:"别太膨胀",
+            description:"给予拜谢效果基于膨胀墙的加成",
+            unlocked(){return hasMilestone('d',7)},
+            effect(){return player.d.points.add(1).log(10).div(3)},
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
+            cost:new Decimal(5000)
+        },
+        13:{
+            name:"dwu3",
+            title:"其实这是占位用的",
+            description:"膨胀墙获取^1.01",
+            unlocked(){return hasMilestone('d',7)},
+            cost:new Decimal(1e4)
+        },
+        21:{
+            name:"dwu4",
+            title:"时间也该膨胀了",
+            description:"基于膨胀墙加成时间获取",
+            effect(){return player.d.points.log(10).add(1)},
+            unlocked(){return hasMilestone('d',7)&&hasUpgrade('d',13)},
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
+            cost:new Decimal(5e4)
+        },
+        22:{
+            name:"dwu5",
+            title:"二重膨胀墙",
+            description:"基于膨胀墙加成膨胀墙获取",
+            effect(){return player.d.points.log(100).add(1)},
+            unlocked(){return hasMilestone('d',7)&&hasUpgrade('d',13)},
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
+            cost:new Decimal(1e5)
+        },
+        23:{
+            name:"dwu6",
+            title:"还有新内容吗?",
+            description:"基于时间加成膨胀墙获取",
+            effect(){return player.points.log(100).div(3).add(1)},
+            unlocked(){return hasMilestone('d',7)&&hasUpgrade('d',13)},
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
+            cost:new Decimal(5e5)
+        },
     },
     milestones:{
         0:{
@@ -384,11 +442,21 @@ addLayer("d", {
         },
         7:{
             requirementDescription: "1000 膨胀墙",
-            effectDescription: "当前版本终局",
+            effectDescription: "解锁膨胀墙升级",
             done() { return player.d.points.gte(1000) }
+        },
+        8:{
+            requirementDescription: "1e8 膨胀墙",
+            effectDescription: "终局",
+            done() { return player.d.points.gte(1e8) }
         },
     },
     layerShown() { return hasChallenge('w',15)||hasMilestone('d',0)},
+    passiveGeneration(){
+        hello=0
+        if(hasUpgrade('d',11)) hello=0.1
+        return hello
+    },
     tabFormat: {
         "milestone":{
             content:[
@@ -396,6 +464,14 @@ addLayer("d", {
                 "prestige-button",
                 "resource-display",
                 "milestones"
+            ]   
+        },
+        "upgrade":{
+            content:[
+                "main-display",
+                "prestige-button",
+                "resource-display",
+                "upgrades"
             ]   
         },
     },
