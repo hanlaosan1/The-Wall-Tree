@@ -1,5 +1,5 @@
 let modInfo = {
-	name: "时时间间墙墙树",
+	name: "墙树",
 	author: "hanlaosan",
 	pointsName: "time",
 	modFiles: ["layers.js", "tree.js"],
@@ -12,8 +12,8 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.?!??",
-	name: "膨胀墙升级",
+	num: "0.30",
+	name: "点击墙",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
@@ -60,12 +60,12 @@ function addedPlayerData() { return {
 }}
 
 // Display extra things at the top of the page
-var displayThings = ["当前版本终局:1000膨胀墙"
+var displayThings = ["当前版本终局:200点击墙"
 ]
 
 // Determines when the game "ends"
 function isEndgame() {
-	return hasMilestone('d',8)
+	return hasUpgrade('c',14)&&player.c.points.gte(200)
 }
 
 
