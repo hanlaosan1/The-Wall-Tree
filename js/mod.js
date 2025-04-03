@@ -46,11 +46,11 @@ function getPointGen() {
 	if(hasUpgrade('w',21)) gain=gain.times(3)
 	if(inChallenge('w',11)||inChallenge('w',13)) gain=gain.div(10)
 	if(hasChallenge('w',11)) gain=gain.times(9)
-	if(hasChallenge('w',13)) gain=gain.pow(1.05)
-	if(inChallenge('w',14)) gain=gain.pow(0.01)
 	if(hasUpgrade('w',32)) gain=gain.times(upgradeEffect('w',32))
 	if(hasUpgrade('w',41)) gain=gain.times(buyableEffect('w',11))
 	if(hasMilestone('d',1)) gain=gain.times(100)
+	if(hasChallenge('w',13)) gain=gain.pow(1.05)
+	if(inChallenge('w',14)) gain=gain.pow(0.01)
 	return gain
 }
 

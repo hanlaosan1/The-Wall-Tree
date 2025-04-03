@@ -517,7 +517,7 @@ addLayer("c", {
         if(hasUpgrade('c',14)) mult=mult.times(5)
         player.c.clkmult=mult
     },
-    layerShown() { return true },
+    layerShown() { return hasMilestone('d',8) },
     upgrades: {
         11: {
             title:"点击挑战！",
