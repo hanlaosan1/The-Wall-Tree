@@ -1,7 +1,7 @@
 let modInfo = {
 	name: "墙树",
 	author: "hanlaosan",
-	pointsName: "time",
+	pointsName: "时间",
 	modFiles: ["layers.js", "tree.js"],
 
 	discordName: "",
@@ -9,10 +9,10 @@ let modInfo = {
 	initialStartPoints: new Decimal (0), // Used for hard resets and new players
 	offlineLimit: 114514,  // In hours
 }
-
+let baixie="<img src=\"s297.gif\" width=\"50\" height=\"50\">"
 // Set your version in num and name
 let VERSION = {
-	num: "0.30",
+	num: "0.31",
 	name: "点击墙",
 }
 
@@ -21,7 +21,7 @@ let changelog = `<h1>Changelog:</h1><br>
 		- Added things.<br>
 		- Added stuff.`
 
-let winText = `<img src=\"s297.gif\" width=\"50\" height=\"50\"><br>有bug反馈到我的qq：1763786760`
+let winText = baixie+baixie+baixie+baixie+baixie+baixie+`<br>有bug反馈到我的qq：1763786760`
 
 // If you add new functions anywhere inside of a layer, and those functions have an effect when called, add them here.
 // (The ones here are examples, all official functions are already taken care of)
@@ -65,7 +65,7 @@ var displayThings = ["当前版本终局:200点击墙"
 
 // Determines when the game "ends"
 function isEndgame() {
-	return hasUpgrade('c',14)&&player.c.points.gte(200)
+	return hasUpgrade('c',41)
 }
 
 
