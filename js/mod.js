@@ -60,7 +60,7 @@ function addedPlayerData() { return {
 }}
 
 // Display extra things at the top of the page
-var displayThings = ["当前版本终局:200点击墙"
+var displayThings = ["当前版本终局:购买1e10膨胀墙的升级"
 ]
 
 // Determines when the game "ends"
