@@ -12,7 +12,7 @@ let modInfo = {
 let baixie="<img src=\"s297.gif\" width=\"50\" height=\"50\">"
 // Set your version in num and name
 let VERSION = {
-	num: "0.31",
+	num: "0.41",
 	name: "点击墙",
 }
 
@@ -21,7 +21,7 @@ let changelog = `<h1>Changelog:</h1><br>
 		- Added things.<br>
 		- Added stuff.`
 
-let winText = baixie+baixie+baixie+baixie+baixie+baixie+`<br>有bug反馈到我的qq：1763786760`
+let winText = baixie+baixie+baixie+baixie+baixie+baixie+`<br>有bug反馈到我的qq：`+baixie+`1763786760`+baixie
 
 // If you add new functions anywhere inside of a layer, and those functions have an effect when called, add them here.
 // (The ones here are examples, all official functions are already taken care of)
@@ -49,6 +49,7 @@ function getPointGen() {
 	if(hasUpgrade('w',32)) gain=gain.times(upgradeEffect('w',32))
 	if(hasUpgrade('w',41)) gain=gain.times(buyableEffect('w',11))
 	if(hasMilestone('d',1)) gain=gain.times(100)
+	if(hasUpgrade('dc',31)) gain=gain.times(upgradeEffect('dc',31))
 	if(hasChallenge('w',13)) gain=gain.pow(1.05)
 	if(inChallenge('w',14)) gain=gain.pow(0.01)
 	return gain
@@ -60,12 +61,12 @@ function addedPlayerData() { return {
 }}
 
 // Display extra things at the top of the page
-var displayThings = ["当前版本终局:购买1e10膨胀墙的升级"
+var displayThings = ["当前版本终局:购买第四行第一列的膨点墙的升级","长按可点击的效果等价于每秒按一次可点击（手机版Qol）"
 ]
 
 // Determines when the game "ends"
 function isEndgame() {
-	return hasUpgrade('c',41)
+	return hasUpgrade('dc',41)
 }
 
 
@@ -79,7 +80,7 @@ var backgroundStyle = {
 
 // You can change this if you have things that can be messed up by long tick lengths
 function maxTickLength() {
-	return(100000000000000000000) // Default is 1 hour which is just arbitrarily large
+	return(10000) // Default is 1 hour which is just arbitrarily large
 }
 
 // Use this if you need to undo inflation from an older version. If the version is older than the version that fixed the issue,

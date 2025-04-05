@@ -21,6 +21,7 @@ addLayer("w", {
         if(hasUpgrade('w',31)) mult=mult.times(upgradeEffect('w',31))
         if(hasMilestone('d',2)) mult=mult.times(player.d.points.times(2).add(1))
         if(hasMilestone('d',4)) mult=mult.times(buyableEffect('w',11))
+        if(hasUpgrade('dc',32)) mult=mult.times(upgradeEffect('dc',32))
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -324,8 +325,13 @@ addLayer("w", {
         }
         if(resettingLayer=='c') 
         {
-            if(hasUpgrade('c',23)) layerDataReset('w',["upgrades","challenges","points","buyables"])
+            if(hasUpgrade('c',23)) {layerDataReset('w',["upgrades","challenges","points","buyables"])}
             layerDataReset('c',["clkmult","points","upgrades"])
+        }
+        if(resettingLayer=='dc') 
+        {
+            layerDataReset('w',["upgrades","challenges","points","buyables"])
+            layerDataReset('c',["clkmult","points","upgrades","clk"])
         }
     },
     layerShown(){return true}
@@ -352,6 +358,7 @@ addLayer("d", {
         mult= new Decimal(1)
         if(hasUpgrade('d',22)) mult=mult.times(upgradeEffect('d',22))
         if(hasUpgrade('d',23)) mult=mult.times(upgradeEffect('d',23))
+        if(hasUpgrade('dc',33)) mult=mult.times(upgradeEffect('dc',33))
         return mult                
     },
     gainExp() { 
@@ -372,7 +379,7 @@ addLayer("d", {
             title:"别太膨胀",
             description:"给予拜谢效果基于膨胀墙的加成",
             unlocked(){return hasMilestone('d',7)&&hasUpgrade('d',11)},
-            effect(){return player.d.points.add(1).log(10).div(3)},
+            effect(){return player.d.points.add(1).log(10).div(3).add(1)},
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
             cost:new Decimal(5000)
         },
@@ -495,7 +502,7 @@ addLayer("c", {
     symbol:"CW",     
     color: "#FF9954",
     resource: "点击墙",
-    branches:["d"],
+    branches:["w","d"],
     row: 1,
     position: 1,
     baseResource: "点击",
@@ -507,7 +514,8 @@ addLayer("c", {
         mult=new Decimal(1)  
         if(hasUpgrade('c',15)) mult=mult.times(5)           
         if(hasUpgrade('c',31)) mult=mult.times(upgradeEffect('c',31))   
-        if(hasUpgrade('c',32)) mult=mult.times(upgradeEffect('c',32))  
+        if(hasUpgrade('c',32)) mult=mult.times(upgradeEffect('c',32)) 
+        if(hasUpgrade('dc',35)) mult=mult.times(upgradeEffect('dc',35)) 
         return mult             
     },
     gainExp() {
@@ -523,6 +531,7 @@ addLayer("c", {
         if(hasUpgrade('c',21)) mult=mult.times(upgradeEffect('c',21))
         if(hasUpgrade('c',22)) mult=mult.times(upgradeEffect('c',22))
         if(hasUpgrade('c',24)) mult=mult.times(upgradeEffect('c',24))
+        if(hasUpgrade('dc',34)) mult=mult.times(upgradeEffect('dc',34))
         player.c.clkmult=mult
     },
     perc()
@@ -651,8 +660,8 @@ addLayer("c", {
             cost: new Decimal(1e9),
         },
         41: {
-            title:"???",
-            description: "终局",
+            title:"超级膨胀",
+            description: "解锁膨点墙层级",
             unlocked(){return hasUpgrade('c',35)},
             cost: new Decimal(1e10),
         },
@@ -664,6 +673,9 @@ addLayer("c", {
             canClick(){return true},
             onClick(){
                 player.c.clk=player.c.clk.add(player.c.clkmult)
+            },
+            onHold(){
+                player.c.clk=player.c.clk.add(player.c.clkmult.times(0.2))
             }
         },
         12: {
@@ -675,18 +687,187 @@ addLayer("c", {
             unlocked(){return hasUpgrade('c',33)},
             onClick(){
                 player.c.points=player.c.points.add(getResetGain('c',useType="normal").times(player.c.per))
+            },
+            onHold(){
+                player.c.points=player.c.points.add(getResetGain('c',useType="normal").times(player.c.per).times(0.2))
             }
         }
     },
     update(diff)
     {
         if(hasUpgrade('c',25)) clickClickable('c',11)
+        if(hasUpgrade('dc',11)) clickClickable('c',12)
     },
     tabFormat: {
         "click":{
             content:[
                 "main-display",
                 "prestige-button",
+                "resource-display",
+                "clickables",
+                "upgrades"
+            ]   
+        },
+    },
+})
+addLayer("dc", {
+    startData() { return {
+        unlocked(){return hasUpgrade('c',41)},
+        points: new Decimal(0),
+        dcmult: new Decimal(1),
+    }},
+    symbol:"DCW",
+    color: "#98B695",
+    resource: "膨点墙",
+    row: 1,
+    position: 2,
+    branches:["c","w","d"],
+    baseResource: "点击墙",
+    baseAmount() { return player.c.points },  
+    requires: new Decimal(10),              
+    type: "normal",
+    exponent: 0.5,
+    gainMult() {
+        mult=new Decimal(1)
+        if(hasUpgrade('dc',26)) mult=mult.times(upgradeEffect('dc',26))
+        return mult
+    },
+    gainExp() {
+        return new Decimal(1)
+    },
+    layerShown() { return hasUpgrade('c',41) },
+    dclkMult()
+    {
+        mult=new Decimal(1)
+        if(hasUpgrade('dc',21)) mult=mult.times(upgradeEffect('dc',21))
+        if(hasUpgrade('dc',22)) mult=mult.times(upgradeEffect('dc',22))
+        if(hasUpgrade('dc',23)) mult=mult.times(upgradeEffect('dc',23))
+        if(hasUpgrade('dc',24)) mult=mult.times(upgradeEffect('dc',24))
+        if(hasUpgrade('dc',25)) mult=mult.times(upgradeEffect('dc',25))
+        if(hasUpgrade('dc',26)) mult=mult.times(upgradeEffect('dc',26))
+        player.dc.dcmult=mult
+    },
+    upgrades:{
+        11:{
+            title:"自动化2",
+            description:"每游戏帧自动点击获取点击墙的可点击",
+            unlocked(){return true},
+            cost:new Decimal(1000),
+        },
+        21:{
+            title:"一切加成1",
+            description:"根据时间加成膨点墙获取",
+            unlocked(){return hasUpgrade('dc',11)},
+            effect(){return player.points.add(1).log(10).pow(0.5).add(1)},
+            effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
+            cost:new Decimal(5000),
+        },
+        22:{
+            title:"一切加成2",
+            description:"根据墙加成膨点墙获取",
+            unlocked(){return hasUpgrade('dc',11)},
+            effect(){return player.w.points.add(1).log(10).pow(0.5).add(1)},
+            effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
+            cost:new Decimal(5000),
+        },
+        23:{
+            title:"一切加成3",
+            description:"根据膨胀墙加成膨点墙获取",
+            unlocked(){return hasUpgrade('dc',11)},
+            effect(){return player.d.points.add(1).log(10).pow(0.5).add(1)},
+            effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
+            cost:new Decimal(5000),
+        },
+        24:{
+            title:"一切加成4",
+            description:"根据点击加成膨点墙获取",
+            unlocked(){return hasUpgrade('dc',11)},
+            effect(){return player.c.clk.add(1).log(10).pow(0.5).add(1)},
+            effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
+            cost:new Decimal(5000),
+        },
+        25:{
+            title:"一切加成5",
+            description:"根据点击墙加成膨点墙获取",
+            unlocked(){return hasUpgrade('dc',11)},
+            effect(){return player.c.points.add(1).log(10).pow(0.5).add(1)},
+            effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
+            cost:new Decimal(5000),
+        },
+        26:{
+            title:"一切加成6",
+            description:"根据膨点墙加成膨点墙获取",
+            unlocked(){return hasUpgrade('dc',11)},
+            effect(){return player.dc.points.add(1).log(10).pow(0.5).add(1)},
+            effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
+            cost:new Decimal(5000),
+        },
+        31:{
+            title:"新一切加成1",
+            description:"根据膨点墙加成时间获取",
+            unlocked(){return hasUpgrade('dc',26)},
+            effect(){return player.dc.points.add(1).log(10)},
+            effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
+            cost:new Decimal(1e7),
+        },
+        32:{
+            title:"新一切加成2",
+            description:"根据膨点墙加成墙获取",
+            unlocked(){return hasUpgrade('dc',26)},
+            effect(){return player.dc.points.add(1).log(10)},
+            effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
+            cost:new Decimal(1e7),
+        },
+        33:{
+            title:"新一切加成3",
+            description:"根据膨点墙加成膨胀墙获取",
+            unlocked(){return hasUpgrade('dc',26)},
+            effect(){return player.dc.points.add(1).log(10)},
+            effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
+            cost:new Decimal(1e7),
+        },
+        34:{
+            title:"新一切加成4",
+            description:"根据膨点墙加成点击获取",
+            unlocked(){return hasUpgrade('dc',26)},
+            effect(){return player.dc.points.add(1).log(10)},
+            effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
+            cost:new Decimal(1e7),
+        },
+        35:{
+            title:"新一切加成5",
+            description:"根据膨点墙加成点击墙获取",
+            unlocked(){return hasUpgrade('dc',26)},
+            effect(){return player.dc.points.add(1).log(10)},
+            effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
+            cost:new Decimal(1e7),
+        },
+        41:{
+            title:"终局",
+            description:"",
+            unlocked(){return hasUpgrade('dc',35)},
+            cost:new Decimal(5e7),
+        }
+    },
+    clickables: {
+        11: {
+            title:"点我试试",
+            display(){return "失去点击墙的%10，获得"+format(player.c.points.add(1).log(10).times(player.dc.dcmult))+"膨点墙"},
+            canClick(){return true},
+            onClick(){
+                player.dc.points=player.dc.points.add(player.c.points.add(1).log(10).times(player.dc.dcmult))
+                player.c.points=player.c.points.times(0.9)
+            },
+            onHold(){
+                player.dc.points=player.dc.points.add(player.c.points.add(1).log(10).times(player.dc.dcmult).times(0.2))
+                player.c.points=player.c.points.times(0.98)
+            }
+        },
+    },
+    tabFormat: {
+        "click":{
+            content:[
+                "main-display",
                 "resource-display",
                 "clickables",
                 "upgrades"
