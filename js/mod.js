@@ -13,7 +13,7 @@ let baixie="<img src=\"s297.gif\" width=\"50\" height=\"50\">"
 // Set your version in num and name
 let VERSION = {
 	num: "0.41",
-	name: "点击墙",
+	name: "膨点墙",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
@@ -21,7 +21,7 @@ let changelog = `<h1>Changelog:</h1><br>
 		- Added things.<br>
 		- Added stuff.`
 
-let winText = baixie+baixie+baixie+baixie+baixie+baixie+`<br>有bug反馈到我的qq：`+baixie+`1763786760`+baixie
+let winText = baixie+baixie+baixie+baixie+baixie+baixie+`<br>有bug反馈到我的qq：`+baixie+`1763786760`+baixie+"<br>b站举报小石认识月谢谢喵"
 
 // If you add new functions anywhere inside of a layer, and those functions have an effect when called, add them here.
 // (The ones here are examples, all official functions are already taken care of)
@@ -48,10 +48,12 @@ function getPointGen() {
 	if(hasChallenge('w',11)) gain=gain.times(9)
 	if(hasUpgrade('w',32)) gain=gain.times(upgradeEffect('w',32))
 	if(hasUpgrade('w',41)) gain=gain.times(buyableEffect('w',11))
-	if(hasMilestone('d',1)) gain=gain.times(100)
+	if(hasMilestone('d',1)&&!hasUpgrade('dc',43)) gain=gain.times(100)
+	if(hasUpgrade('dc',43)) gain=gain.times(new Decimal(10).pow(upgradeEffect('dc',43)))
 	if(hasUpgrade('dc',31)) gain=gain.times(upgradeEffect('dc',31))
+	if(hasUpgrade('sw',11)) gain=gain.times(upgradeEffect('sw',11))
 	if(hasChallenge('w',13)) gain=gain.pow(1.05)
-	if(inChallenge('w',14)) gain=gain.pow(0.01)
+	if(inChallenge('w',14)) gain=gain.pow(0.1)
 	return gain
 }
 
@@ -61,12 +63,12 @@ function addedPlayerData() { return {
 }}
 
 // Display extra things at the top of the page
-var displayThings = ["当前版本终局:购买第四行第一列的膨点墙的升级","长按可点击的效果等价于每秒按一次可点击（手机版Qol）"
+var displayThings = ["当前版本终局:购买所有超级墙升级","长按可点击的效果等价于每秒按一次可点击（手机版Qol）"
 ]
 
 // Determines when the game "ends"
 function isEndgame() {
-	return hasUpgrade('dc',41)
+	return hasUpgrade('sw',11)&&hasUpgrade('sw',21)&&hasUpgrade('sw',22)&&hasUpgrade('sw',23)&&hasUpgrade('sw',24)
 }
 
 

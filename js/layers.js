@@ -13,6 +13,7 @@ addLayer("w", {
     baseAmount() {return player.points}, // Get the current amount of baseResource
     type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
     exponent: 0.5, // Prestige currency exponent
+    
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1)
         if(hasChallenge('w',12)) mult=mult.times(4)
@@ -22,13 +23,14 @@ addLayer("w", {
         if(hasMilestone('d',2)) mult=mult.times(player.d.points.times(2).add(1))
         if(hasMilestone('d',4)) mult=mult.times(buyableEffect('w',11))
         if(hasUpgrade('dc',32)) mult=mult.times(upgradeEffect('dc',32))
+        if(hasUpgrade('sw',11)) mult=mult.times(upgradeEffect('sw',11))
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
         exp=new Decimal(1)
         if(hasChallenge('w',13)) exp=exp.times(1.05)
         if(hasChallenge('w',14)) exp=exp.times(challengeEffect('w',14))
-            if(inChallenge('w',14)) exp=exp.times(0.6)
+        if(inChallenge('w',14)) exp=exp.times(0.6)
         return exp
     },
     passiveGeneration(){
@@ -40,6 +42,7 @@ addLayer("w", {
         dev=new Decimal(1)
         if(hasUpgrade('w',33)) dev=dev.times(2)
         if(inChallenge('w',15)) dev=dev.div(100)
+        if(hasUpgrade('dc',44)) dev=dev.times(upgradeEffect('dc',44))
         player.devSpeed=dev
     },
     row: 0, // Row the layer is in on the tree (0 is the first row)
@@ -160,7 +163,7 @@ addLayer("w", {
             description:"解锁wc5",
             cost:new Decimal(1e7),
             unlocked(){return hasUpgrade('w',42)}
-        }
+        },
     },
     challenges: {
         11: {
@@ -222,7 +225,7 @@ addLayer("w", {
         },
         14: {
             name: "wc4",
-            challengeDescription: "时间获取速度^0.01,墙获取^0.6<br><p style=\"color:rgb(255, 0, 0);\">不要点击重置，会退出挑战</p>",
+            challengeDescription: "时间获取速度^0.1,墙获取^0.6<br><p style=\"color:rgb(255, 0, 0);\">不要点击重置，会退出挑战</p>",
             goalDescription:"拥有10墙",
             canComplete: function() {return player[this.layer].points.gte(10)},
             onEnter(){
@@ -259,7 +262,7 @@ addLayer("w", {
             },
             rewardDescription:"解锁下一层级,根据墙数量加成拜谢效果",
             rewardEffect(){
-                if(hasChallenge('w',15)) return player.w.points.add(1).log(10)
+                if(hasChallenge('w',15)) return player.w.points.add(1).log(10).add(1)
                 else return new Decimal(1)
             },
             rewardDisplay(){return "x"+format(challengeEffect(this.layer, this.id))},
@@ -318,27 +321,20 @@ addLayer("w", {
     },
     resetsNothing(){return false},
     doReset(resettingLayer){
-        if(resettingLayer=='d') 
+        if(tmp[resettingLayer].row>tmp.w.row)
         {
-            if(hasMilestone('d',6)) layerDataReset('w',["challenges"])
-            else layerDataReset('w',[])
+            let kept=[]
+            if(hasMilestone('d',6)) kept.push("challenges")
+            if(hasUpgrade('c',23)&&resettingLayer=='c') kept.push("upgrades","buyables")
+            if(hasUpgrade('sw',21)&&resettingLayer=='sw') kept.push("upgrades","buyables","challenges")
         }
-        if(resettingLayer=='c') 
-        {
-            if(hasUpgrade('c',23)) {layerDataReset('w',["upgrades","challenges","points","buyables"])}
-            layerDataReset('c',["clkmult","points","upgrades"])
-        }
-        if(resettingLayer=='dc') 
-        {
-            layerDataReset('w',["upgrades","challenges","points","buyables"])
-            layerDataReset('c',["clkmult","points","upgrades","clk"])
-        }
+        layerDataReset('w',kept)
     },
     layerShown(){return true}
 })
 addLayer("d", {
     startData() { return {                   
-        unlocked(){return hasChallenge('w',15)},                     
+        unlocked(){return false},                     
         points: new Decimal(0),              
         cha:new Decimal(1)
     }},
@@ -354,11 +350,15 @@ addLayer("d", {
     exponent: 0.3,                
     branches:['w'],          
     position:0,
+    canClick(){return player[this.layer].unlocked()},
+    canReset(){return hasChallenge('w',15)&&player.w.points.gte(player.d.requires)},
     gainMult() {               
         mult= new Decimal(1)
         if(hasUpgrade('d',22)) mult=mult.times(upgradeEffect('d',22))
         if(hasUpgrade('d',23)) mult=mult.times(upgradeEffect('d',23))
         if(hasUpgrade('dc',33)) mult=mult.times(upgradeEffect('dc',33))
+        if(hasUpgrade('dc',41)) mult=mult.times(buyableEffect('w',11))
+        if(hasUpgrade('sw',11)) mult=mult.times(upgradeEffect('sw',11))
         return mult                
     },
     gainExp() { 
@@ -394,7 +394,7 @@ addLayer("d", {
             name:"dwu4",
             title:"时间也该膨胀了",
             description:"基于膨胀墙加成时间获取",
-            effect(){return player.d.points.add(1).log(10)},
+            effect(){return player.d.points.add(1).log(10).add(1)},
             unlocked(){return hasMilestone('d',7)&&hasUpgrade('d',13)},
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
             cost:new Decimal(5e4)
@@ -403,7 +403,7 @@ addLayer("d", {
             name:"dwu5",
             title:"二重膨胀墙",
             description:"基于膨胀墙加成膨胀墙获取",
-            effect(){return player.d.points.add(1).log(100)},
+            effect(){return player.d.points.add(1).log(100).add(1)},
             unlocked(){return hasMilestone('d',7)&&hasUpgrade('d',21)},
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
             cost:new Decimal(1e5)
@@ -412,7 +412,7 @@ addLayer("d", {
             name:"dwu6",
             title:"还有新内容吗?",
             description:"基于时间加成膨胀墙获取",
-            effect(){return player.points.add(1).log(100).div(3)},
+            effect(){return player.points.add(1).log(100).div(3).add(1)},
             unlocked(){return hasMilestone('d',7)&&hasUpgrade('d',22)},
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
             cost:new Decimal(5e5)
@@ -426,7 +426,9 @@ addLayer("d", {
         },
         1:{
             requirementDescription: "2 膨胀墙",
-            effectDescription: "时间获取速度*100",
+            effectDescription(){
+                return hasUpgrade('dc',43)?"时间获取速度*"+format(new Decimal(100).pow(upgradeEffect('dc',43))):"时间获取速度*"+format(new Decimal(100))
+            },
             done() { return player.d.points.gte(2) }
         },
         2:{
@@ -465,7 +467,7 @@ addLayer("d", {
             done() { return player.d.points.gte(1e8) }
         },
     },
-    layerShown() { return hasChallenge('w',15)||hasMilestone('d',0)},
+    layerShown() { return hasChallenge('w',15)||hasMilestone('d',0)||player.sw.unlocked()},
     passiveGeneration(){
         hello=0
         if(hasUpgrade('d',11)) hello=0.1
@@ -489,6 +491,14 @@ addLayer("d", {
             ]   
         },
     },
+    doReset(resettingLayer){
+        if(tmp[resettingLayer].row>tmp.d.row)
+        {
+            let kept=[]
+            if(hasUpgrade('sw',22)&&resettingLayer=='sw') kept.push("upgrades","milestones")
+        }
+        layerDataReset('d',kept)
+    },
 })
 addLayer("c", {
     startData() { return {
@@ -510,12 +520,15 @@ addLayer("c", {
     requires: new Decimal(10),
     type: "normal",
     exponent: 0.5,
+    canClick(){return player[this.layer].unlocked()},
     gainMult() {         
         mult=new Decimal(1)  
         if(hasUpgrade('c',15)) mult=mult.times(5)           
         if(hasUpgrade('c',31)) mult=mult.times(upgradeEffect('c',31))   
         if(hasUpgrade('c',32)) mult=mult.times(upgradeEffect('c',32)) 
         if(hasUpgrade('dc',35)) mult=mult.times(upgradeEffect('dc',35)) 
+        if(hasUpgrade('dc',41)) mult=mult.times(buyableEffect('w',11))
+        if(hasUpgrade('sw',11)) mult=mult.times(upgradeEffect('sw',11))
         return mult             
     },
     gainExp() {
@@ -532,6 +545,8 @@ addLayer("c", {
         if(hasUpgrade('c',22)) mult=mult.times(upgradeEffect('c',22))
         if(hasUpgrade('c',24)) mult=mult.times(upgradeEffect('c',24))
         if(hasUpgrade('dc',34)) mult=mult.times(upgradeEffect('dc',34))
+        if(hasUpgrade('dc',41)) mult=mult.times(buyableEffect('w',11))
+        if(hasUpgrade('sw',11)) mult=mult.times(upgradeEffect('sw',11))
         player.c.clkmult=mult
     },
     perc()
@@ -542,7 +557,7 @@ addLayer("c", {
         if(hasUpgrade('c',35)) p=new Decimal(1)
         player.c.per=p
     },
-    layerShown() { return hasMilestone('d',8) },
+    layerShown() { return hasMilestone('d',8)||player.sw.unlocked()},
     upgrades: {
         11: {
             title:"点击挑战！",
@@ -593,7 +608,7 @@ addLayer("c", {
             title:"用时间来点击",
             description: "时间加成点击获取",
             unlocked(){return hasUpgrade('c',15)},
-            effect(){return player.points.add(1).log(10).div(2)},
+            effect(){return player.points.add(1).log(10).div(2).add(1)},
             effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
             cost: new Decimal(1e3),
         },
@@ -615,7 +630,7 @@ addLayer("c", {
             title:"点击那个膨胀墙",
             description: "膨胀墙加成点击获取",
             unlocked(){return hasUpgrade('c',23)},
-            effect(){return player.d.points.add(1).log(2)},
+            effect(){return player.d.points.add(1).log(2).add(1)},
             effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
             cost: new Decimal(1e4),
         },
@@ -629,7 +644,7 @@ addLayer("c", {
             title:"更墙的点击墙",
             description: "根据墙加成点击墙获取",
             unlocked(){return hasUpgrade('c',25)},
-            effect(){return player.w.points.add(1).log(10)},
+            effect(){return player.w.points.add(1).log(10).add(1)},
             effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
             cost: new Decimal(1e5),
         },
@@ -637,7 +652,7 @@ addLayer("c", {
             title:"双重点击墙",
             description: "根据点击墙加成点击墙获取",
             unlocked(){return hasUpgrade('c',31)},
-            effect(){return player.c.points.add(1).log(3)},
+            effect(){return player.c.points.add(1).log(3).add(1)},
             effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
             cost: new Decimal(5e6),
         },
@@ -669,8 +684,8 @@ addLayer("c", {
     clickables: {
         11: {
             title:"点我试试",
-            display(){return "获得"+format(player.c.clkmult)+"个点击"},
-            canClick(){return true},
+            display(){return hasMilestone('d',8)?"获得"+format(player.c.clkmult)+"个点击":"完成膨胀里程碑以解锁"},
+            canClick(){return hasMilestone('d',8)},
             onClick(){
                 player.c.clk=player.c.clk.add(player.c.clkmult)
             },
@@ -709,33 +724,44 @@ addLayer("c", {
             ]   
         },
     },
+    doReset(resettingLayer){
+        if(tmp[resettingLayer].row>tmp.d.row)
+        {
+            let kept=[]
+            if(hasUpgrade('sw',23)&&resettingLayer=='sw') kept.push("upgrades","clk","clkmult")
+        }
+        layerDataReset('c',kept)
+    },
 })
 addLayer("dc", {
     startData() { return {
         unlocked(){return hasUpgrade('c',41)},
         points: new Decimal(0),
         dcmult: new Decimal(1),
+        auto: false
     }},
     symbol:"DCW",
     color: "#98B695",
     resource: "膨点墙",
     row: 1,
     position: 2,
+
     branches:["c","w","d"],
     baseResource: "点击墙",
     baseAmount() { return player.c.points },  
     requires: new Decimal(10),              
-    type: "normal",
-    exponent: 0.5,
+    type: "none",
+    canClick(){return !player[this.layer].unlocked()},
     gainMult() {
         mult=new Decimal(1)
         if(hasUpgrade('dc',26)) mult=mult.times(upgradeEffect('dc',26))
+        if(hasUpgrade('dc',41)) mult=mult.times(buyableEffect('w',11))
         return mult
     },
     gainExp() {
         return new Decimal(1)
     },
-    layerShown() { return hasUpgrade('c',41) },
+    layerShown() { return hasUpgrade('c',41)||player.sw.unlocked()},
     dclkMult()
     {
         mult=new Decimal(1)
@@ -745,6 +771,8 @@ addLayer("dc", {
         if(hasUpgrade('dc',24)) mult=mult.times(upgradeEffect('dc',24))
         if(hasUpgrade('dc',25)) mult=mult.times(upgradeEffect('dc',25))
         if(hasUpgrade('dc',26)) mult=mult.times(upgradeEffect('dc',26))
+        if(hasUpgrade('dc',41)) mult=mult.times(buyableEffect('w',11))
+        if(hasUpgrade('sw',11)) mult=mult.times(upgradeEffect('sw',11))
         player.dc.dcmult=mult
     },
     upgrades:{
@@ -758,7 +786,7 @@ addLayer("dc", {
             title:"一切加成1",
             description:"根据时间加成膨点墙获取",
             unlocked(){return hasUpgrade('dc',11)},
-            effect(){return player.points.add(1).log(10).pow(0.5).add(1)},
+            effect(){return player.points.add(1).log(10).add(1)},
             effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
             cost:new Decimal(5000),
         },
@@ -766,7 +794,7 @@ addLayer("dc", {
             title:"一切加成2",
             description:"根据墙加成膨点墙获取",
             unlocked(){return hasUpgrade('dc',11)},
-            effect(){return player.w.points.add(1).log(10).pow(0.5).add(1)},
+            effect(){return player.w.points.add(1).log(10).add(1)},
             effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
             cost:new Decimal(5000),
         },
@@ -774,7 +802,7 @@ addLayer("dc", {
             title:"一切加成3",
             description:"根据膨胀墙加成膨点墙获取",
             unlocked(){return hasUpgrade('dc',11)},
-            effect(){return player.d.points.add(1).log(10).pow(0.5).add(1)},
+            effect(){return player.d.points.add(1).log(10).add(1)},
             effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
             cost:new Decimal(5000),
         },
@@ -782,7 +810,7 @@ addLayer("dc", {
             title:"一切加成4",
             description:"根据点击加成膨点墙获取",
             unlocked(){return hasUpgrade('dc',11)},
-            effect(){return player.c.clk.add(1).log(10).pow(0.5).add(1)},
+            effect(){return player.c.clk.add(1).log(10).add(1)},
             effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
             cost:new Decimal(5000),
         },
@@ -790,7 +818,7 @@ addLayer("dc", {
             title:"一切加成5",
             description:"根据点击墙加成膨点墙获取",
             unlocked(){return hasUpgrade('dc',11)},
-            effect(){return player.c.points.add(1).log(10).pow(0.5).add(1)},
+            effect(){return player.c.points.add(1).log(10).add(1)},
             effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
             cost:new Decimal(5000),
         },
@@ -798,7 +826,7 @@ addLayer("dc", {
             title:"一切加成6",
             description:"根据膨点墙加成膨点墙获取",
             unlocked(){return hasUpgrade('dc',11)},
-            effect(){return player.dc.points.add(1).log(10).pow(0.5).add(1)},
+            effect(){return player.dc.points.add(1).log(10).add(1)},
             effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
             cost:new Decimal(5000),
         },
@@ -806,63 +834,116 @@ addLayer("dc", {
             title:"新一切加成1",
             description:"根据膨点墙加成时间获取",
             unlocked(){return hasUpgrade('dc',26)},
-            effect(){return player.dc.points.add(1).log(10)},
+            effect(){return player.dc.points.pow(0.3).times(3).add(1)},
             effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
-            cost:new Decimal(1e7),
+            cost:new Decimal(1e8),
         },
         32:{
             title:"新一切加成2",
             description:"根据膨点墙加成墙获取",
             unlocked(){return hasUpgrade('dc',26)},
-            effect(){return player.dc.points.add(1).log(10)},
+            effect(){return player.dc.points.pow(0.3).times(3).add(1)},
             effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
-            cost:new Decimal(1e7),
+            cost:new Decimal(1e8),
         },
         33:{
             title:"新一切加成3",
             description:"根据膨点墙加成膨胀墙获取",
             unlocked(){return hasUpgrade('dc',26)},
-            effect(){return player.dc.points.add(1).log(10)},
+            effect(){return player.dc.points.pow(0.3).times(3).add(1)},
             effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
-            cost:new Decimal(1e7),
+            cost:new Decimal(1e8),
         },
         34:{
             title:"新一切加成4",
             description:"根据膨点墙加成点击获取",
             unlocked(){return hasUpgrade('dc',26)},
-            effect(){return player.dc.points.add(1).log(10)},
+            effect(){return player.dc.points.pow(0.3).times(3).add(1)},
             effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
-            cost:new Decimal(1e7),
+            cost:new Decimal(1e8),
         },
         35:{
             title:"新一切加成5",
             description:"根据膨点墙加成点击墙获取",
             unlocked(){return hasUpgrade('dc',26)},
-            effect(){return player.dc.points.add(1).log(10)},
+            effect(){return player.dc.points.pow(0.3).times(3).add(1)},
             effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
-            cost:new Decimal(1e7),
+            cost:new Decimal(1e8),
         },
         41:{
-            title:"终局",
-            description:"",
+            title:"拜谢！",
+            description:"拜谢加成任何点数获取",
             unlocked(){return hasUpgrade('dc',35)},
-            cost:new Decimal(5e7),
-        }
+            cost:new Decimal(1e11),
+        },
+        42:{
+            title:"自动化3！？",
+            description:"解锁一个自动化开关",
+            unlocked(){return hasUpgrade('dc',41)},
+            cost:new Decimal(5e18),
+        },
+        43:{
+            title:"快点，快点，再快点",
+            description:"根据膨点墙加成膨胀墙里程碑2的效果",
+            unlocked(){return hasUpgrade('dc',42)},
+            effect(){return player.dc.points.add(1).log(10).times(3).add(1)},
+            effectDisplay(){return "^"+format(upgradeEffect(this.layer,this.id))},
+            cost:new Decimal(1e20),
+        },
+        44:{
+            title:"天堂制造",
+            description:"将游戏速度基于膨胀墙加速",
+            unlocked(){return hasUpgrade('dc',43)},
+            effect(){return player.dc.points.pow(0.2).add(1)},
+            effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
+            cost:new Decimal(1e23),
+        },
+        45:{
+            title:"哇",
+            description:"获得膨胀墙不再需要失去点击墙",
+            unlocked(){return hasUpgrade('dc',44)},
+            cost:new Decimal(1e23),
+        },
+        51: {
+            title:"超级无敌炫酷墙",
+            description: "解锁超级墙",
+            unlocked(){return hasUpgrade('dc',45)},
+            cost: new Decimal(1e100),
+            currencyDisplayName:"时间",
+            currencyInternalName:"points",
+        },
     },
     clickables: {
         11: {
             title:"点我试试",
-            display(){return "失去点击墙的%10，获得"+format(player.c.points.add(1).log(10).times(player.dc.dcmult))+"膨点墙"},
-            canClick(){return true},
+            display(){
+                if(!hasUpgrade('dc',45)) return hasUpgrade('c',41)?"失去点击墙的%10，获得"+format(player.c.points.add(1).log(10).times(player.dc.dcmult))+"膨点墙":"购买最后一个点击墙升级以解锁"
+                return "获得"+format(player.c.points.add(1).log(10).times(player.dc.dcmult))+"膨点墙"
+            },
+            canClick(){return hasUpgrade('c',41)},
             onClick(){
                 player.dc.points=player.dc.points.add(player.c.points.add(1).log(10).times(player.dc.dcmult))
-                player.c.points=player.c.points.times(0.9)
+                if(!hasUpgrade('dc',45)) player.c.points=player.c.points.times(0.9)
             },
             onHold(){
                 player.dc.points=player.dc.points.add(player.c.points.add(1).log(10).times(player.dc.dcmult).times(0.2))
-                player.c.points=player.c.points.times(0.98)
-            }
+                if(!hasUpgrade('dc',45)) player.c.points=player.c.points.times(0.98)
+            },
         },
+        12: {
+			title: "自动开关",
+			display(){
+				return hasUpgrade('dc', 42)?(player.dc.auto?"开":"关"):"禁用"
+			},
+			unlocked() { return hasUpgrade('dc',42) },
+			canClick() { return hasUpgrade('dc',42) },
+			onClick() { player.dc.auto = !player.dc.auto },
+			style: {"background-color"() { return player.dc.auto?"#98B695":"#666666" }},
+		},
+    },
+    update(diff)
+    {
+        if(player.dc.auto) clickClickable('dc',11)
     },
     tabFormat: {
         "click":{
@@ -871,6 +952,126 @@ addLayer("dc", {
                 "resource-display",
                 "clickables",
                 "upgrades"
+            ]   
+        },
+    },
+    doReset(resettingLayer){
+        if(tmp[resettingLayer].row>tmp.d.row)
+        {
+            let kept=[]
+            if(hasUpgrade('sw',24)&&resettingLayer=='sw') kept.push("upgrades")
+        }
+        layerDataReset('dc',kept)
+    },
+})
+addLayer('sw',{
+    startData(){ return{
+            unlocked(){return hasUpgrade('dc',51)||player.sw.points.gte(1)},
+            points: new Decimal(0),
+            resetTimes: new Decimal(0),
+            pt:new Decimal(0)
+        }
+    },
+    color: "#1D63B2",
+    resource:"超级墙",
+    row:2,
+    symbol:"SW",
+    position:0,
+    baseResource:"膨点墙",
+    baseAmount(){return player.dc.points},
+    branches:['c','d','dc'],
+    requires:new Decimal(1e24),
+    type:"normal",
+    exponent:0.5,
+    gainMult(){
+        mult=new Decimal(1)
+        if(hasUpgrade('sw',11)) mult=mult.times(upgradeEffect('sw',11))
+        return mult
+    },
+    gainExp(){
+        exp=new Decimal(1)
+        return exp
+    },
+    onPrestige(){
+        player.sw.resetTimes=player.sw.resetTimes.add(1)
+        player.sw.pt=player.sw.pt.add(1)
+    },
+    nodeStyle: {
+        background: "linear-gradient(90deg,#FF7D00, #FFFF00,#00FF00, #00FFFF,#0000FF,#FF00FF)",
+        "background-origin": "border-box",
+    },
+    upgrades:{
+        11:{
+            title:"超级开始",
+            description:"基于超级墙加成所有点数获取",
+            unlocked(){return true},
+            effect(){return player.sw.points.add(1).log(10).add(2)},
+            effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
+            cost:new Decimal(1),
+            currencyDisplayName:"超级点数",
+            currencyInternalName:"pt",
+            currencyLayer:"sw",
+        },
+        21:{
+            title:"修复墙",
+            description:"超级墙层级重置时不会重置墙层级",
+            unlocked(){return hasUpgrade('sw',11)},
+            cost:new Decimal(1),
+            currencyDisplayName:"超级点数",
+            currencyInternalName:"pt",
+            currencyLayer:"sw",
+            branches:[11]
+        },
+        22:{
+            title:"修复膨胀墙",
+            description:"超级墙层级重置时不会重置膨胀墙层级",
+            unlocked(){return hasUpgrade('sw',11)},
+            cost:new Decimal(1),
+            currencyDisplayName:"超级点数",
+            currencyInternalName:"pt",
+            currencyLayer:"sw",
+            branches:[11]
+        },
+        23:{
+            title:"修复点击墙",
+            description:"超级墙层级重置时不会重置点击墙层级",
+            unlocked(){return hasUpgrade('sw',11)},
+            cost:new Decimal(1),
+            currencyDisplayName:"超级点数",
+            currencyInternalName:"pt",
+            currencyLayer:"sw",
+            branches:[11]
+        },
+        24:{
+            title:"修复膨点墙",
+            description:"超级墙层级重置时不会重置膨点墙层级",
+            unlocked(){return hasUpgrade('sw',11)},
+            cost:new Decimal(1),
+            currencyDisplayName:"超级点数",
+            currencyInternalName:"pt",
+            currencyLayer:"sw",
+            branches:[11]
+        },
+    },
+    layerShown(){return hasUpgrade('dc',51)||player.sw.unlocked()},
+    tabFormat: {
+        "upgrades-tree":{
+            content:[
+                "main-display",
+                "resource-display",
+                ["display-text",
+                  function() {
+                      return "你超级了"+format(player.sw.resetTimes)+"次"
+                   },
+                { "color": "#FFFFFF", "font-size": "20px"}],
+                ["display-text",
+                  function() {
+                      return "你有"+format(player.sw.pt)+"超级点数"
+                   },
+                { "color": "#FFFFFF", "font-size": "20px"}],
+                "prestige-button",
+                ['row',[['upgrade',11]]],"blank",
+                ['row',[['upgrade',21],['upgrade',22],['upgrade',23],['upgrade',24]]],"blank",
             ]   
         },
     },
