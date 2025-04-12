@@ -12,8 +12,8 @@ let modInfo = {
 let baixie="<img src=\"s297.gif\" width=\"50\" height=\"50\">"
 // Set your version in num and name
 let VERSION = {
-	num: "0.41",
-	name: "膨点墙",
+	num: "0.51",
+	name: "超级墙",
 }
 
 let changelog = `<h1>Changelog:</h1><br>

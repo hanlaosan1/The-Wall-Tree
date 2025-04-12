@@ -327,8 +327,8 @@ addLayer("w", {
             if(hasMilestone('d',6)) kept.push("challenges")
             if(hasUpgrade('c',23)&&resettingLayer=='c') kept.push("upgrades","buyables")
             if(hasUpgrade('sw',21)&&resettingLayer=='sw') kept.push("upgrades","buyables","challenges")
+            layerDataReset('w',kept)
         }
-        layerDataReset('w',kept)
     },
     layerShown(){return true}
 })
@@ -496,8 +496,8 @@ addLayer("d", {
         {
             let kept=[]
             if(hasUpgrade('sw',22)&&resettingLayer=='sw') kept.push("upgrades","milestones")
+            layerDataReset('d',kept)
         }
-        layerDataReset('d',kept)
     },
 })
 addLayer("c", {
@@ -729,8 +729,8 @@ addLayer("c", {
         {
             let kept=[]
             if(hasUpgrade('sw',23)&&resettingLayer=='sw') kept.push("upgrades","clk","clkmult")
+            layerDataReset('c',kept)
         }
-        layerDataReset('c',kept)
     },
 })
 addLayer("dc", {
