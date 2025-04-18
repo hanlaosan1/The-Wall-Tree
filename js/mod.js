@@ -12,8 +12,8 @@ let modInfo = {
 let baixie="<img src=\"s297.gif\" width=\"50\" height=\"50\">"
 // Set your version in num and name
 let VERSION = {
-	num: "0.51",
-	name: "超级墙",
+	num: "1.0",
+	name: "墙树终局",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
@@ -21,7 +21,7 @@ let changelog = `<h1>Changelog:</h1><br>
 		- Added things.<br>
 		- Added stuff.`
 
-let winText = baixie+baixie+baixie+baixie+baixie+baixie+`<br>有bug反馈到我的qq：`+baixie+`1763786760`+baixie+"<br>b站举报小石认识月谢谢喵"
+let winText = baixie+baixie+baixie+baixie+baixie+baixie+`<br>我的第一个完结的树作品（虽然很史）<br>有bug反馈到我的qq：`+baixie+`1763786760`+baixie+"<br>b站举报小石认识月谢谢喵"
 
 // If you add new functions anywhere inside of a layer, and those functions have an effect when called, add them here.
 // (The ones here are examples, all official functions are already taken care of)
@@ -68,7 +68,7 @@ var displayThings = ["当前版本终局:购买所有超级墙升级","长按可
 
 // Determines when the game "ends"
 function isEndgame() {
-	return hasUpgrade('sw',11)&&hasUpgrade('sw',21)&&hasUpgrade('sw',22)&&hasUpgrade('sw',23)&&hasUpgrade('sw',24)
+	return hasUpgrade('sw',51)||player.devSpeed==0
 }
 
 

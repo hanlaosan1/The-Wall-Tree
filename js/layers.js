@@ -41,12 +41,12 @@ addLayer("w", {
     Speedup(){
         dev=new Decimal(1)
         if(hasUpgrade('w',33)) dev=dev.times(2)
-        if(inChallenge('w',15)) dev=dev.div(100)
         if(hasUpgrade('dc',44)) dev=dev.times(upgradeEffect('dc',44))
+        if(inChallenge('w',15)) dev=dev.div(100)
+        dev=dev.times(new Decimal(1).sub(player.sw.resetTimes.div(100)))
         player.devSpeed=dev
     },
     row: 0, // Row the layer is in on the tree (0 is the first row)
-    chaHardcap(){if(player.d.cha.gte(6)) player.d.cha=new Decimal(6)},
     upgrades:{
         11:{
             name:"wu1",
@@ -295,7 +295,7 @@ addLayer("w", {
     {
            if(hasMilestone('d',4)&&layers.w.buyables[11].canAfford()) buyBuyable('w',11)
     },
-    autoUpgrade(){return hasMilestone('d',5)},
+    autoUpgrade(){return hasMilestone('d',5)||hasUpgrade('sw',31)},
     tabFormat: {
         "upgrade":{
             content:[
@@ -321,12 +321,12 @@ addLayer("w", {
     },
     resetsNothing(){return false},
     doReset(resettingLayer){
+        let kept=[]
         if(tmp[resettingLayer].row>tmp.w.row)
         {
-            let kept=[]
             if(hasMilestone('d',6)) kept.push("challenges")
-            if(hasUpgrade('c',23)&&resettingLayer=='c') kept.push("upgrades","buyables")
-            if(hasUpgrade('sw',21)&&resettingLayer=='sw') kept.push("upgrades","buyables","challenges")
+            if(hasUpgrade('c',23)&&resettingLayer=='c') kept.push("upgrades","buyables","challenges")
+            if(hasUpgrade('sw',21)&&resettingLayer=='sw') kept.push("challenges")
             layerDataReset('w',kept)
         }
     },
@@ -491,12 +491,15 @@ addLayer("d", {
             ]   
         },
     },
+    autoUpgrade(){return hasUpgrade('sw',32)},
     doReset(resettingLayer){
+        let kept=[]
+        let upgrade=[11]
         if(tmp[resettingLayer].row>tmp.d.row)
         {
-            let kept=[]
-            if(hasUpgrade('sw',22)&&resettingLayer=='sw') kept.push("upgrades","milestones")
+            if(hasUpgrade('sw',22)&&resettingLayer=='sw') kept.push("milestones")
             layerDataReset('d',kept)
+            if(hasUpgrade('sw',22)&&resettingLayer=='sw') player.d.upgrades=upgrade
         }
     },
 })
@@ -659,19 +662,19 @@ addLayer("c", {
         33: {
             title:"新的可点击！",
             description: "解锁一个新可点击",
-            unlocked(){return hasUpgrade('c',32)},
+            unlocked(){return hasUpgrade('c',32)||hasUpgrade('sw',23)},
             cost: new Decimal(6e7),
         },
         34: {
             title:"更强的新可点击",
             description: "加强新的可点击",
-            unlocked(){return hasUpgrade('c',33)},
+            unlocked(){return hasUpgrade('c',33)||hasUpgrade('sw',23)},
             cost: new Decimal(1e8),
         },
         35: {
             title:"特强的新可点击",
             description: "再次加强新的可点击",
-            unlocked(){return hasUpgrade('c',34)},
+            unlocked(){return hasUpgrade('c',34)||hasUpgrade('sw',23)},
             cost: new Decimal(1e9),
         },
         41: {
@@ -684,8 +687,8 @@ addLayer("c", {
     clickables: {
         11: {
             title:"点我试试",
-            display(){return hasMilestone('d',8)?"获得"+format(player.c.clkmult)+"个点击":"完成膨胀里程碑以解锁"},
-            canClick(){return hasMilestone('d',8)},
+            display(){return this.canClick()?"获得"+format(player.c.clkmult)+"个点击":"完成膨胀里程碑以解锁"},
+            canClick(){return hasMilestone('d',8)||hasUpgrade('sw',23)},
             onClick(){
                 player.c.clk=player.c.clk.add(player.c.clkmult)
             },
@@ -724,13 +727,13 @@ addLayer("c", {
             ]   
         },
     },
+    autoUpgrade(){return hasUpgrade('sw',33)},
     doReset(resettingLayer){
-        if(tmp[resettingLayer].row>tmp.d.row)
-        {
-            let kept=[]
-            if(hasUpgrade('sw',23)&&resettingLayer=='sw') kept.push("upgrades","clk","clkmult")
-            layerDataReset('c',kept)
-        }
+        let kept=["upgrades"]
+        let upgrade=[25,33,34,35]
+        if(resettingLayer=='c') kept.push("points")
+        layerDataReset('c',kept)
+        if(hasUpgrade('sw',23)&&resettingLayer=='sw') player.c.upgrades=upgrade
     },
 })
 addLayer("dc", {
@@ -738,7 +741,7 @@ addLayer("dc", {
         unlocked(){return hasUpgrade('c',41)},
         points: new Decimal(0),
         dcmult: new Decimal(1),
-        auto: false
+        auto(){return hasUpgrade('dc',42)}
     }},
     symbol:"DCW",
     color: "#98B695",
@@ -917,10 +920,10 @@ addLayer("dc", {
         11: {
             title:"点我试试",
             display(){
-                if(!hasUpgrade('dc',45)) return hasUpgrade('c',41)?"失去点击墙的%10，获得"+format(player.c.points.add(1).log(10).times(player.dc.dcmult))+"膨点墙":"购买最后一个点击墙升级以解锁"
+                if(!hasUpgrade('dc',45)) return this.canClick()?"失去点击墙的%10，获得"+format(player.c.points.add(1).log(10).times(player.dc.dcmult))+"膨点墙":"购买最后一个点击墙升级以解锁"
                 return "获得"+format(player.c.points.add(1).log(10).times(player.dc.dcmult))+"膨点墙"
             },
-            canClick(){return hasUpgrade('c',41)},
+            canClick(){return hasUpgrade('c',41)||hasUpgrade('sw',24)},
             onClick(){
                 player.dc.points=player.dc.points.add(player.c.points.add(1).log(10).times(player.dc.dcmult))
                 if(!hasUpgrade('dc',45)) player.c.points=player.c.points.times(0.9)
@@ -943,7 +946,7 @@ addLayer("dc", {
     },
     update(diff)
     {
-        if(player.dc.auto) clickClickable('dc',11)
+        if(player.dc.auto&&hasUpgrade('dc',42)) clickClickable('dc',11)
     },
     tabFormat: {
         "click":{
@@ -955,13 +958,15 @@ addLayer("dc", {
             ]   
         },
     },
+    autoUpgrade(){return hasUpgrade('sw',34)},
     doReset(resettingLayer){
+        let kept=[]
+        let upgrade=[11,42]
         if(tmp[resettingLayer].row>tmp.d.row)
         {
-            let kept=[]
-            if(hasUpgrade('sw',24)&&resettingLayer=='sw') kept.push("upgrades")
+            layerDataReset('dc',kept)
+            if(hasUpgrade('sw',24)&&resettingLayer=='sw') player.dc.upgrades=upgrade
         }
-        layerDataReset('dc',kept)
     },
 })
 addLayer('sw',{
@@ -1005,7 +1010,7 @@ addLayer('sw',{
             title:"超级开始",
             description:"基于超级墙加成所有点数获取",
             unlocked(){return true},
-            effect(){return player.sw.points.add(1).log(10).add(2)},
+            effect(){return player.sw.points.add(1).pow(0.5).add(2)},
             effectDisplay(){return format(upgradeEffect(this.layer,this.id))+"x"},
             cost:new Decimal(1),
             currencyDisplayName:"超级点数",
@@ -1014,7 +1019,7 @@ addLayer('sw',{
         },
         21:{
             title:"修复墙",
-            description:"超级墙层级重置时不会重置墙层级",
+            description:"超级墙层级重置时不会重置墙挑战",
             unlocked(){return hasUpgrade('sw',11)},
             cost:new Decimal(1),
             currencyDisplayName:"超级点数",
@@ -1024,7 +1029,7 @@ addLayer('sw',{
         },
         22:{
             title:"修复膨胀墙",
-            description:"超级墙层级重置时不会重置膨胀墙层级",
+            description:"超级墙层级重置时不会重置膨胀墙里程碑",
             unlocked(){return hasUpgrade('sw',11)},
             cost:new Decimal(1),
             currencyDisplayName:"超级点数",
@@ -1034,7 +1039,7 @@ addLayer('sw',{
         },
         23:{
             title:"修复点击墙",
-            description:"超级墙层级重置时不会重置点击墙层级",
+            description:"超级墙层级重置时不会重置可点击与自动点击",
             unlocked(){return hasUpgrade('sw',11)},
             cost:new Decimal(1),
             currencyDisplayName:"超级点数",
@@ -1044,7 +1049,7 @@ addLayer('sw',{
         },
         24:{
             title:"修复膨点墙",
-            description:"超级墙层级重置时不会重置膨点墙层级",
+            description:"超级墙层级重置时不会重置膨点墙可点击与自动点击",
             unlocked(){return hasUpgrade('sw',11)},
             cost:new Decimal(1),
             currencyDisplayName:"超级点数",
@@ -1052,7 +1057,67 @@ addLayer('sw',{
             currencyLayer:"sw",
             branches:[11]
         },
+        31:{
+            title:"自动墙",
+            description:"自动购买墙升级",
+            unlocked(){return hasUpgrade('sw',21)},
+            cost:new Decimal(1),
+            currencyDisplayName:"超级点数",
+            currencyInternalName:"pt",
+            currencyLayer:"sw",
+            branches:[21]
+        },
+        32:{
+            title:"自动膨胀墙",
+            description:"自动购买膨胀墙升级",
+            unlocked(){return hasUpgrade('sw',22)},
+            cost:new Decimal(1),
+            currencyDisplayName:"超级点数",
+            currencyInternalName:"pt",
+            currencyLayer:"sw",
+            branches:[22]
+        },
+        33:{
+            title:"自动点击墙",
+            description:"自动购买点击墙升级",
+            unlocked(){return hasUpgrade('sw',23)},
+            cost:new Decimal(1),
+            currencyDisplayName:"超级点数",
+            currencyInternalName:"pt",
+            currencyLayer:"sw",
+            branches:[23]
+        },
+        34:{
+            title:"自动膨点墙",
+            description:"自动购买膨点墙升级",
+            unlocked(){return hasUpgrade('sw',24)},
+            cost:new Decimal(1),
+            currencyDisplayName:"超级点数",
+            currencyInternalName:"pt",
+            currencyLayer:"sw",
+            branches:[24]
+        },
+        41:{
+            title:"迎接终局",
+            description:"自动超级墙重置",
+            unlocked(){return hasUpgrade('sw',31)&&hasUpgrade('sw',32)&&hasUpgrade('sw',33)&&hasUpgrade('sw',34)},
+            cost:new Decimal(1),
+            currencyDisplayName:"超级点数",
+            currencyInternalName:"pt",
+            currencyLayer:"sw",
+            branches:[31,32,33,34]
+        },
+        51:{
+            title:"终局",
+            description:"终局",
+            unlocked(){return player.devSpeed==0},
+            cost:new Decimal(0),
+            currencyDisplayName:"时间",
+            currencyInternalName:"points",
+            branches:[41]
+        },
     },
+    autoPrestige(){return hasUpgrade('sw',41)},
     layerShown(){return hasUpgrade('dc',51)||player.sw.unlocked()},
     tabFormat: {
         "upgrades-tree":{
@@ -1061,7 +1126,7 @@ addLayer('sw',{
                 "resource-display",
                 ["display-text",
                   function() {
-                      return "你超级了"+format(player.sw.resetTimes)+"次"
+                      return "你超级了"+format(player.sw.resetTimes)+"次,"+"使游戏速度*"+format(new Decimal(1).sub(player.sw.resetTimes.div(100)))
                    },
                 { "color": "#FFFFFF", "font-size": "20px"}],
                 ["display-text",
@@ -1072,6 +1137,9 @@ addLayer('sw',{
                 "prestige-button",
                 ['row',[['upgrade',11]]],"blank",
                 ['row',[['upgrade',21],['upgrade',22],['upgrade',23],['upgrade',24]]],"blank",
+                ['row',[['upgrade',31],['upgrade',32],['upgrade',33],['upgrade',34]]],"blank",
+                ['row',[['upgrade',41]]],"blank",
+                ['row',[['upgrade',51]]],"blank",
             ]   
         },
     },
